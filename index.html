@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ImmoRechner">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1a365d">
+    <title>Immobilienrechner Pro</title>
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiSW1tb2JpbGllbnJlY2huZXIgUHJvIiwic2hvcnRfbmFtZSI6IkltbW9SZWNobmVyIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2YyZjRmNyIsInRoZW1lX2NvbG9yIjoiIzFhMzY1ZCIsInN0YXJ0X3VybCI6Ii4ifQ==">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjQwIiBmaWxsPSIjMWEzNjVkIi8+PHRleHQgeD0iOTAiIHk9IjEyMCIgZm9udC1zaXplPSI5MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiPvCfj6A8L3RleHQ+PC9zdmc+">
+    <style>
+        :root {
+            --primary: #1a365d; --primary-light: #2c5282;
+            --accent: #2b6cb0; --accent-light: #4299e1;
+            --success: #276749; --success-bg: #f0fff4;
+            --warning: #c05621; --warning-bg: #fffaf0;
+            --danger: #c53030; --danger-bg: #fff5f5;
+            --g50: #f7fafc; --g100: #edf2f7; --g200: #e2e8f0; --g300: #cbd5e0;
+            --g400: #a0aec0; --g500: #718096; --g600: #4a5568; --g700: #2d3748; --g800: #1a202c;
+            --white: #fff; --radius: 8px; --radius-lg: 12px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1); --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+        html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:var(--g100);color:var(--g800);line-height:1.5;min-height:100vh;min-height:100dvh;padding-bottom:var(--safe-bottom);}
+
+        /* HEADER */
+        .hdr{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;padding:calc(var(--safe-top) + 12px) 16px 14px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.15);}
+        .hdr-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+        .hdr h1{font-size:1.25rem;font-weight:700;}
+        .hdr-sub{font-size:0.75rem;opacity:0.8;}
+        .hdr-btns{display:flex;gap:6px;flex-wrap:wrap;}
+        .btn-h{background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:7px 12px;border-radius:var(--radius);cursor:pointer;font-size:0.78rem;font-weight:500;touch-action:manipulation;}
+        .btn-h:active{background:rgba(255,255,255,0.3);}
+        .save-indicator{font-size:0.7rem;opacity:0.7;margin-top:2px;}
+
+        /* LAYOUT */
+        .main{max-width:1200px;margin:0 auto;padding:12px;}
+        .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+        .full{grid-column:1/-1;}
+        @media(max-width:900px){.grid{grid-template-columns:1fr;}}
+
+        /* CARDS */
+        .card{background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow:hidden;}
+        .card-h{background:var(--g50);padding:12px 16px;border-bottom:1px solid var(--g200);display:flex;align-items:center;gap:8px;}
+        .card-ico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.95rem;flex-shrink:0;}
+        .ico-b{background:#ebf8ff;color:var(--accent);}
+        .ico-g{background:#f0fff4;color:var(--success);}
+        .ico-o{background:#fffaf0;color:var(--warning);}
+        .ico-r{background:#fff5f5;color:var(--danger);}
+        .ico-p{background:#faf5ff;color:#6b46c1;}
+        .ico-t{background:#e6fffa;color:#285e61;}
+        .ico-y{background:#fefcbf;color:#975a16;}
+        .card-h h2{font-size:0.88rem;font-weight:600;color:var(--g700);}
+        .card-b{padding:16px;}
+
+        /* FORM */
+        .fr{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+        .fr1{grid-template-columns:1fr;}
+        @media(max-width:500px){.fr{grid-template-columns:1fr;}}
+        .fg{display:flex;flex-direction:column;}
+        .fg label{font-size:0.72rem;font-weight:600;color:var(--g600);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.03em;}
+        .iw{position:relative;display:flex;align-items:center;}
+        .iw input,.iw select{width:100%;padding:10px 12px;border:1.5px solid var(--g300);border-radius:var(--radius);font-size:16px;color:var(--g800);background:var(--white);transition:border-color 0.2s;}
+        .iw input:focus,.iw select:focus{outline:none;border-color:var(--accent-light);box-shadow:0 0 0 3px rgba(66,153,225,0.12);}
+        .iw input::-webkit-outer-spin-button,.iw input::-webkit-inner-spin-button{-webkit-appearance:none;}
+        .iw input[type=number]{-moz-appearance:textfield;}
+        .isuf{position:absolute;right:12px;color:var(--g400);font-size:0.85rem;font-weight:500;pointer-events:none;}
+        .iw input.hs{padding-right:34px;}
+        .iw select{appearance:none;-webkit-appearance:none;padding-right:34px;cursor:pointer;}
+        .sarr{position:absolute;right:12px;color:var(--g400);pointer-events:none;font-size:0.6rem;}
+
+        /* SLIDER */
+        .sr{display:flex;align-items:center;gap:10px;padding:4px 0;}
+        .sr input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:6px;border-radius:3px;background:var(--g200);outline:none;touch-action:pan-x;}
+        .sr input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:32px;height:32px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.2);border:3px solid #fff;}
+        .sr input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.2);border:3px solid #fff;}
+        .sv{min-width:50px;text-align:right;font-weight:600;font-size:0.9rem;color:var(--g700);}
+
+        /* RESULTS */
+        .rg{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+        .rg4{grid-template-columns:1fr 1fr;}
+        @media(min-width:700px){.rg4{grid-template-columns:repeat(4,1fr);}}
+        .ri{padding:10px 12px;border-radius:var(--radius);background:var(--g50);border:1px solid var(--g200);}
+        .ri.hl{background:#ebf8ff;border-color:#bee3f8;}
+        .ri.ok{background:var(--success-bg);border-color:#c6f6d5;}
+        .ri.wr{background:var(--warning-bg);border-color:#feebc8;}
+        .ri.dg{background:var(--danger-bg);border-color:#fed7d7;}
+        .ri.fw{grid-column:1/-1;}
+        .rl{font-size:0.68rem;font-weight:600;color:var(--g500);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:1px;}
+        .rv{font-size:1.15rem;font-weight:700;color:var(--g800);}
+        .rv.tb{color:var(--accent);} .rv.tg{color:var(--success);} .rv.to{color:var(--warning);} .rv.tr{color:var(--danger);}
+        .rsub{font-size:0.68rem;color:var(--g500);margin-top:1px;}
+
+        /* SEPARATOR */
+        .sep{height:1px;background:var(--g200);margin:12px 0;}
+
+        /* TOGGLE */
+        .tgl{display:flex;border:1.5px solid var(--g300);border-radius:var(--radius);overflow:hidden;}
+        .tgl button{flex:1;padding:8px 8px;text-align:center;font-size:0.78rem;font-weight:600;cursor:pointer;background:var(--white);color:var(--g500);border:none;touch-action:manipulation;transition:all 0.15s;}
+        .tgl button:not(:last-child){border-right:1.5px solid var(--g300);}
+        .tgl button.act{background:var(--accent);color:#fff;}
+
+        /* TABS */
+        .tabs{display:flex;border-bottom:2px solid var(--g200);margin-bottom:12px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+        .tabs::-webkit-scrollbar{display:none;}
+        .tabs button{padding:9px 14px;font-size:0.8rem;font-weight:600;color:var(--g500);cursor:pointer;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;background:none;white-space:nowrap;touch-action:manipulation;}
+        .tabs button.act{color:var(--accent);border-bottom-color:var(--accent);}
+        .tc{display:none;}.tc.act{display:block;}
+
+        /* AMPEL */
+        .ampel{display:flex;gap:8px;flex-wrap:wrap;}
+        .amp-i{flex:1;min-width:70px;padding:10px 8px;border-radius:var(--radius);text-align:center;}
+        .amp-dot{width:12px;height:12px;border-radius:50%;display:inline-block;margin-bottom:3px;}
+        .amp-lab{font-size:0.68rem;font-weight:600;text-transform:uppercase;margin-bottom:2px;}
+        .amp-val{font-size:0.95rem;font-weight:700;}
+        .amp-sub{font-size:0.62rem;color:var(--g500);margin-top:1px;}
+
+        /* BAR */
+        .bbar{height:8px;border-radius:4px;background:var(--g200);margin-top:8px;overflow:hidden;}
+        .bfill{height:100%;border-radius:4px;transition:width 0.4s ease;}
+        .btxt{margin-top:6px;font-size:0.82rem;font-weight:500;padding:8px 10px;border-radius:var(--radius);}
+
+        /* EK BAR */
+        .ekbar{display:flex;height:24px;border-radius:6px;overflow:hidden;background:var(--g200);margin-top:6px;}
+        .ekbar div{display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;color:#fff;transition:width 0.4s;overflow:hidden;}
+
+        /* SZENARIEN */
+        .szg{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+        @media(min-width:700px){.szg{grid-template-columns:repeat(3,1fr);}}
+        .szc{padding:12px;border-radius:var(--radius);border:2px solid var(--g200);text-align:center;}
+        .szc.best{border-color:#c6f6d5;background:var(--success-bg);}
+        .szt{font-size:0.72rem;font-weight:600;text-transform:uppercase;color:var(--g500);margin-bottom:6px;}
+        .szv{font-size:1.25rem;font-weight:700;margin-bottom:2px;}
+
+        /* TABLE */
+        .tw{overflow-x:auto;max-height:450px;overflow-y:auto;border-radius:var(--radius);border:1px solid var(--g200);-webkit-overflow-scrolling:touch;}
+        table{width:100%;border-collapse:collapse;font-size:0.78rem;}
+        thead{position:sticky;top:0;z-index:1;}
+        thead th{background:var(--primary);color:#fff;padding:8px 10px;text-align:right;font-weight:600;font-size:0.7rem;text-transform:uppercase;white-space:nowrap;}
+        thead th:first-child{text-align:center;}
+        tbody td{padding:6px 10px;text-align:right;border-bottom:1px solid var(--g100);white-space:nowrap;}
+        tbody td:first-child{text-align:center;font-weight:600;}
+        tbody tr:nth-child(even){background:var(--g50);}
+        tbody tr.zbh{background:#ebf8ff;font-weight:600;}
+
+        /* EA TABLE */
+        .eat{width:100%;border-collapse:collapse;}
+        .eat th{background:var(--g50);padding:7px 10px;text-align:left;font-size:0.7rem;font-weight:600;color:var(--g600);text-transform:uppercase;border-bottom:2px solid var(--g200);}
+        .eat th:nth-child(2){text-align:right;}
+        .eat td{padding:5px 8px;border-bottom:1px solid var(--g100);}
+        .eat .ei,.eat .en{width:100%;padding:7px 8px;border:1px solid var(--g200);border-radius:4px;font-size:16px;background:var(--white);}
+        .eat .ei{text-align:right;}
+        .eat .ei:focus,.eat .en:focus{outline:none;border-color:var(--accent-light);box-shadow:0 0 0 2px rgba(66,153,225,0.12);}
+        .eat tfoot td{padding:8px 10px;font-weight:700;font-size:0.9rem;border-top:2px solid var(--g300);background:var(--g50);}
+        .eat .re{border-left:3px solid var(--success);}
+        .eat .ra{border-left:3px solid var(--danger);}
+        .eat .rx{border-left:3px solid var(--warning);}
+        .ea-add{display:inline-flex;align-items:center;gap:4px;padding:7px 14px;border:1.5px dashed var(--g300);border-radius:var(--radius);background:var(--white);color:var(--g500);font-size:0.8rem;font-weight:500;cursor:pointer;touch-action:manipulation;margin-top:6px;}
+        .ea-add:active{border-color:var(--accent);color:var(--accent);}
+        .ea-rm{background:none;border:none;color:var(--g400);cursor:pointer;font-size:1.1rem;padding:4px 8px;border-radius:4px;touch-action:manipulation;}
+        .ea-rm:active{color:var(--danger);background:var(--danger-bg);}
+
+        /* CHART */
+        .chart-c{position:relative;width:100%;height:280px;}
+        .chart-c canvas{width:100%!important;height:100%!important;}
+
+        /* INFO TIP */
+        .tip{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--g300);color:#fff;font-size:0.6rem;font-weight:700;cursor:help;margin-left:3px;}
+
+        /* NOTIFICATION */
+        .notif{position:fixed;top:calc(var(--safe-top) + 60px);right:12px;background:var(--success);color:#fff;padding:10px 16px;border-radius:var(--radius);box-shadow:var(--shadow-md);font-size:0.85rem;font-weight:500;z-index:200;transform:translateX(120%);transition:transform 0.3s;}
+        .notif.show{transform:translateX(0);}
+
+        /* TWO COL EA */
+        .ea-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+        @media(max-width:700px){.ea-grid{grid-template-columns:1fr;}}
+
+        /* PRINT */
+        @media print{.hdr{position:static;}.btn-h,.ea-add,.ea-rm{display:none;}.card{break-inside:avoid;box-shadow:none;border:1px solid var(--g300);}body{background:#fff;}.tw{max-height:none;overflow:visible;}}
+    </style>
+</head>
+<body>
+
+<div class="hdr">
+    <div class="hdr-inner">
+        <div>
+            <h1>Immobilienrechner Pro</h1>
+            <div class="hdr-sub">Kauf-, Finanzierungs- & Haushaltsanalyse</div>
+            <div class="save-indicator" id="save_status">Daten werden automatisch gespeichert</div>
+        </div>
+        <div class="hdr-btns">
+            <button class="btn-h" id="btn_save">Speichern</button>
+            <button class="btn-h" id="btn_reset">Zuruecksetzen</button>
+            <button class="btn-h" id="btn_print">PDF drucken</button>
+        </div>
+    </div>
+</div>
+
+<div class="notif" id="notif"></div>
+
+<div class="main"><div class="grid">
+
+    <!-- KAUFPREIS -->
+    <div class="card">
+        <div class="card-h"><div class="card-ico ico-b">&#127968;</div><h2>Kaufpreis & Nebenkosten</h2></div>
+        <div class="card-b">
+            <div class="fr fr1"><div class="fg"><label>Kaufpreis</label><div class="iw"><input type="text" id="kaufpreis" inputmode="decimal" class="hs" value="350.000"><span class="isuf">&euro;</span></div></div></div>
+            <div class="fr">
+                <div class="fg"><label>Bundesland</label><div class="iw"><select id="bundesland">
+                    <option value="5.0">Baden-W. (5,0%)</option><option value="3.5">Bayern (3,5%)</option>
+                    <option value="6.0">Berlin (6,0%)</option><option value="6.5">Brandenburg (6,5%)</option>
+                    <option value="5.0">Bremen (5,0%)</option><option value="5.5">Hamburg (5,5%)</option>
+                    <option value="6.0" selected>Hessen (6,0%)</option><option value="6.0">Meckl.-Vorp. (6,0%)</option>
+                    <option value="5.0">Niedersachsen (5,0%)</option><option value="6.5">NRW (6,5%)</option>
+                    <option value="5.0">Rheinl.-Pfalz (5,0%)</option><option value="6.5">Saarland (6,5%)</option>
+                    <option value="5.5">Sachsen (5,5%)</option><option value="5.0">Sachsen-A. (5,0%)</option>
+                    <option value="6.5">Schleswig-H. (6,5%)</option><option value="5.0">Thueringen (5,0%)</option>
+                </select><span class="sarr">&#9660;</span></div></div>
+                <div class="fg"><label>Grunderwerbsteuer</label><div class="sr"><input type="range" id="grunderwerbsteuer" min="3.5" max="6.5" step="0.5" value="6.0"><span class="sv" id="gest_v">6,0%</span></div></div>
+            </div>
+            <div class="fr">
+                <div class="fg"><label>Notarkosten</label><div class="sr"><input type="range" id="notarkosten" min="1.0" max="2.5" step="0.1" value="2.0"><span class="sv" id="notar_v">2,0%</span></div></div>
+                <div class="fg"><label>Maklerprovision</label><div class="sr"><input type="range" id="maklerprovision" min="0" max="7.14" step="0.01" value="3.57"><span class="sv" id="makler_v">3,57%</span></div></div>
+            </div>
+            <div class="sep"></div>
+            <div class="rg">
+                <div class="ri"><div class="rl">Grunderwerbsteuer</div><div class="rv" id="r_gest">-</div></div>
+                <div class="ri"><div class="rl">Notar & Grundbuch</div><div class="rv" id="r_notar">-</div></div>
+                <div class="ri"><div class="rl">Maklerprovision</div><div class="rv" id="r_makler">-</div></div>
+                <div class="ri hl"><div class="rl">Nebenkosten gesamt</div><div class="rv tb" id="r_nk">-</div><div class="rsub" id="r_nk_pct"></div></div>
+                <div class="ri fw" style="background:var(--primary);border-color:var(--primary);"><div class="rl" style="color:rgba(255,255,255,0.7);">Gesamtkosten</div><div class="rv" style="color:#fff;font-size:1.3rem;" id="r_gesamt">-</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FINANZIERUNG -->
+    <div class="card">
+        <div class="card-h"><div class="card-ico ico-g">&#128176;</div><h2>Eigenkapital & Finanzierung</h2></div>
+        <div class="card-b">
+            <div class="fr">
+                <div class="fg"><label>Eigenkapital</label><div class="iw"><input type="text" id="eigenkapital" inputmode="decimal" class="hs" value="80.000"><span class="isuf">&euro;</span></div></div>
+                <div class="fg"><label>EK-Verwendung</label><div class="tgl" id="ek_tgl"><button class="act" data-m="gesamt">Gesamtkosten</button><button data-m="kaufpreis">Nur Kaufpreis</button></div></div>
+            </div>
+            <div class="ekbar"><div id="ekb_ek" style="background:var(--success);width:20%;">EK</div><div id="ekb_kr" style="background:var(--accent);width:80%;">Kredit</div></div>
+            <div style="display:flex;justify-content:space-between;margin-top:3px;font-size:0.68rem;color:var(--g500);"><span id="ekb_l1">-</span><span id="ekb_l2">-</span></div>
+            <div class="sep"></div>
+            <div class="fr">
+                <div class="fg"><label>Sollzins (p.a.)</label><div class="sr"><input type="range" id="zinssatz" min="0.5" max="8.0" step="0.05" value="3.50"><span class="sv" id="zins_v">3,50%</span></div></div>
+                <div class="fg"><label>Tilgung (p.a.)</label><div class="sr"><input type="range" id="tilgung" min="0.5" max="10.0" step="0.1" value="2.0"><span class="sv" id="tilg_v">2,0%</span></div></div>
+            </div>
+            <div class="fr">
+                <div class="fg"><label>Zinsbindung</label><div class="sr"><input type="range" id="zinsbindung" min="5" max="30" step="1" value="15"><span class="sv" id="zb_v">15 J.</span></div></div>
+                <div class="fg"><label>Sondertilgung/Jahr</label><div class="iw"><input type="text" id="sondertilgung" inputmode="decimal" class="hs" value="0"><span class="isuf">&euro;</span></div></div>
+            </div>
+            <div class="sep"></div>
+            <div class="rg">
+                <div class="ri hl"><div class="rl">Darlehensbetrag</div><div class="rv tb" id="r_dar">-</div></div>
+                <div class="ri ok"><div class="rl">Monatliche Rate</div><div class="rv tg" id="r_rate">-</div></div>
+                <div class="ri"><div class="rl">Beleihungsauslauf</div><div class="rv" id="r_bel">-</div></div>
+                <div class="ri"><div class="rl">Eigenkapitalquote</div><div class="rv" id="r_ekq">-</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EINNAHMEN & FIXKOSTEN -->
+    <div class="card full">
+        <div class="card-h"><div class="card-ico ico-t">&#128209;</div><h2>Monatliche Einnahmen & Fixkosten</h2></div>
+        <div class="card-b">
+            <div class="ea-grid">
+                <div>
+                    <h3 style="font-size:0.82rem;font-weight:700;color:var(--success);margin-bottom:8px;text-transform:uppercase;">Einnahmen</h3>
+                    <table class="eat"><thead><tr><th>Bezeichnung</th><th style="width:38%">Betrag/Monat</th><th style="width:32px"></th></tr></thead>
+                    <tbody id="ein_body"></tbody>
+                    <tfoot><tr><td style="color:var(--success)">Summe</td><td style="text-align:right;color:var(--success)" id="sum_ein">0 &euro;</td><td></td></tr></tfoot></table>
+                    <button class="ea-add" id="add_ein">+ Einnahme</button>
+                </div>
+                <div>
+                    <h3 style="font-size:0.82rem;font-weight:700;color:var(--danger);margin-bottom:8px;text-transform:uppercase;">Fixkosten</h3>
+                    <table class="eat"><thead><tr><th>Bezeichnung</th><th style="width:38%">Betrag/Monat</th><th style="width:32px"></th></tr></thead>
+                    <tbody id="aus_body"></tbody>
+                    <tfoot><tr><td style="color:var(--danger)">Summe</td><td style="text-align:right;color:var(--danger)" id="sum_aus">0 &euro;</td><td></td></tr></tfoot></table>
+                    <button class="ea-add" id="add_aus">+ Fixkosten</button>
+                </div>
+            </div>
+            <div class="sep"></div>
+            <div class="rg rg4">
+                <div class="ri ok"><div class="rl">Einkommen</div><div class="rv tg" id="r_eink">-</div></div>
+                <div class="ri dg"><div class="rl">Fixkosten</div><div class="rv tr" id="r_fix">-</div></div>
+                <div class="ri hl"><div class="rl">Frei verfuegbar</div><div class="rv tb" id="r_frei">-</div></div>
+                <div class="ri"><div class="rl">Belastungsquote</div><div class="rv" id="r_bq">-</div><div class="rsub">Empf. max 35%</div></div>
+            </div>
+            <div class="sep"></div>
+            <div class="rg"><div class="ri fw" id="puffer_box"><div class="rl">Puffer nach Kreditrate</div><div class="rv" id="r_puf" style="font-size:1.3rem;">-</div><div class="rsub" id="r_puf_h"></div></div></div>
+        </div>
+    </div>
+
+    <!-- EXTRA-KOSTEN / SANIERUNG -->
+    <div class="card full">
+        <div class="card-h"><div class="card-ico ico-y">&#128295;</div><h2>Reparaturen, Sanierung & Extra-Kosten</h2></div>
+        <div class="card-b">
+            <p style="font-size:0.82rem;color:var(--g500);margin-bottom:10px;">Einmalige oder langfristige Kosten, die zusaetzlich zum Kaufpreis anfallen (z.B. Renovierung, neue Heizung, Dach, Kueche).</p>
+            <table class="eat"><thead><tr><th>Massnahme</th><th style="width:30%">Kosten</th><th style="width:20%">Zeitpunkt</th><th style="width:32px"></th></tr></thead>
+            <tbody id="extra_body"></tbody>
+            <tfoot><tr><td style="color:var(--warning);font-weight:700;">Summe Extra-Kosten</td><td style="text-align:right;color:var(--warning);font-weight:700;" id="sum_extra">0 &euro;</td><td></td><td></td></tr></tfoot></table>
+            <button class="ea-add" id="add_extra">+ Kosten hinzufuegen</button>
+            <div class="sep"></div>
+            <div class="rg">
+                <div class="ri wr"><div class="rl">Gesamte Extra-Kosten</div><div class="rv to" id="r_extra">0 &euro;</div></div>
+                <div class="ri" style="background:var(--primary);border-color:var(--primary);"><div class="rl" style="color:rgba(255,255,255,0.7);">Gesamtinvestition (Kauf + Nebenk. + Extra)</div><div class="rv" style="color:#fff;font-size:1.2rem;" id="r_total">-</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ERGEBNIS -->
+    <div class="card full">
+        <div class="card-h"><div class="card-ico ico-p">&#128202;</div><h2>Finanzierungsuebersicht</h2></div>
+        <div class="card-b">
+            <div class="tabs" id="mtabs">
+                <button class="act" data-t="t_ov">Uebersicht</button>
+                <button data-t="t_sz">Zinsszenarien</button>
+                <button data-t="t_tp">Tilgungsplan</button>
+                <button data-t="t_ch">Grafik</button>
+            </div>
+            <div class="tc act" id="t_ov">
+                <div class="rg rg4">
+                    <div class="ri"><div class="rl">Zinsen gesamt</div><div class="rv tr" id="r_zges">-</div></div>
+                    <div class="ri"><div class="rl">Zinsen (Zinsbindung)</div><div class="rv to" id="r_zbind">-</div></div>
+                    <div class="ri"><div class="rl">Restschuld n. Bindung</div><div class="rv tb" id="r_rest">-</div></div>
+                    <div class="ri ok"><div class="rl">Laufzeit</div><div class="rv tg" id="r_lz">-</div></div>
+                </div>
+                <div class="sep"></div>
+                <div style="font-size:0.78rem;font-weight:600;color:var(--g600);margin-bottom:8px;text-transform:uppercase;">Ampel</div>
+                <div class="ampel" id="ampel_c"></div>
+                <div class="sep"></div>
+                <div id="bew_box"></div>
+            </div>
+            <div class="tc" id="t_sz">
+                <p style="font-size:0.82rem;color:var(--g500);margin-bottom:12px;">Neue Rate nach Ende der Zinsbindung bei verschiedenen Zinssaetzen:</p>
+                <div class="szg" id="sz_grid"></div>
+            </div>
+            <div class="tc" id="t_tp">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
+                    <div class="tgl" id="tp_tgl" style="width:auto;"><button class="act" data-v="j">Jaehrlich</button><button data-v="m">Monatlich</button></div>
+                    <button class="btn-h" style="background:var(--accent);border-color:var(--accent);" id="btn_csv">CSV Export</button>
+                </div>
+                <div class="tw" id="tp_table"></div>
+            </div>
+            <div class="tc" id="t_ch">
+                <div class="chart-c"><canvas id="chart"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+</div></div>
+
+<div style="text-align:center;padding:16px;color:var(--g400);font-size:0.7rem;">
+    Immobilienrechner Pro &mdash; Alle Berechnungen ohne Gewaehr.<br>
+    Tipp: Auf iPhone &quot;Zum Home-Bildschirm&quot; hinzufuegen fuer App-Erlebnis.
+</div>
+
+<script>
+(function(){
+'use strict';
+
+// ==========================================
+// STATE
+// ==========================================
+var S = {
+    ekMode: 'gesamt',
+    tpView: 'j',
+    einnahmen: [
+        {n:'Nettolohn Person 1',b:0},{n:'Nettolohn Person 2',b:0},{n:'Kindergeld',b:0}
+    ],
+    ausgaben: [
+        {n:'Lebensmittel & Haushalt',b:0},{n:'Versicherungen',b:0},{n:'Strom & Gas',b:0},
+        {n:'Internet & Telefon',b:0},{n:'Auto (Vers., Sprit, Steuer)',b:0},
+        {n:'Abos & Streaming',b:0},{n:'Sonstige Kredite',b:0},{n:'Kinderbetreuung',b:0},{n:'Sonstiges',b:0}
+    ],
+    extras: [
+        {n:'Renovierung / Malerarbeiten',b:0,z:'Vor Einzug'},
+        {n:'Neue Kueche',b:0,z:'Vor Einzug'},
+        {n:'Neue Heizung / Daemmung',b:0,z:'Innerhalb 5 Jahre'},
+        {n:'Dachsanierung',b:0,z:'Innerhalb 10 Jahre'},
+        {n:'Baeder sanieren',b:0,z:'Vor Einzug'},
+        {n:'Garten / Aussenanlage',b:0,z:'Innerhalb 2 Jahre'}
+    ]
+};
+var tpData = [];
+var mRate = 0;
+
+// ==========================================
+// HELPERS
+// ==========================================
+function $(id){return document.getElementById(id);}
+function pn(s){if(!s)return 0;return parseFloat(String(s).replace(/\./g,'').replace(',','.'))||0;}
+function fm(n){return n.toLocaleString('de-DE',{minimumFractionDigits:0,maximumFractionDigits:0});}
+function fm2(n){return n.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+
+function fmtInput(inp){
+    var r=inp.value.replace(/\./g,'').replace(/[^0-9,]/g,'');
+    var p=r.split(',');var i=p[0].replace(/^0+(?=\d)/,'');
+    if(i==='')i='0';i=i.replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+    inp.value=p.length>1?i+','+p[1].slice(0,2):i;
+}
+
+function notify(m){var e=$('notif');e.textContent=m;e.classList.add('show');setTimeout(function(){e.classList.remove('show');},2200);}
+
+// ==========================================
+// SAVE / LOAD (localStorage)
+// ==========================================
+var SAVE_KEY = 'immorechner_v2';
+var saveTimer = null;
+
+function saveState(){
+    try{
+        var d = {
+            kaufpreis: $('kaufpreis').value,
+            bundesland: $('bundesland').value,
+            grunderwerbsteuer: $('grunderwerbsteuer').value,
+            notarkosten: $('notarkosten').value,
+            maklerprovision: $('maklerprovision').value,
+            eigenkapital: $('eigenkapital').value,
+            ekMode: S.ekMode,
+            zinssatz: $('zinssatz').value,
+            tilgung: $('tilgung').value,
+            zinsbindung: $('zinsbindung').value,
+            sondertilgung: $('sondertilgung').value,
+            einnahmen: S.einnahmen,
+            ausgaben: S.ausgaben,
+            extras: S.extras
+        };
+        localStorage.setItem(SAVE_KEY, JSON.stringify(d));
+        $('save_status').textContent = 'Gespeichert um ' + new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+    }catch(e){}
+}
+
+function autoSave(){
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveState, 500);
+}
+
+function loadState(){
+    try{
+        var raw = localStorage.getItem(SAVE_KEY);
+        if(!raw) return false;
+        var d = JSON.parse(raw);
+        if(d.kaufpreis) $('kaufpreis').value = d.kaufpreis;
+        if(d.bundesland) $('bundesland').value = d.bundesland;
+        if(d.grunderwerbsteuer) $('grunderwerbsteuer').value = d.grunderwerbsteuer;
+        if(d.notarkosten) $('notarkosten').value = d.notarkosten;
+        if(d.maklerprovision) $('maklerprovision').value = d.maklerprovision;
+        if(d.eigenkapital) $('eigenkapital').value = d.eigenkapital;
+        if(d.ekMode) S.ekMode = d.ekMode;
+        if(d.zinssatz) $('zinssatz').value = d.zinssatz;
+        if(d.tilgung) $('tilgung').value = d.tilgung;
+        if(d.zinsbindung) $('zinsbindung').value = d.zinsbindung;
+        if(d.sondertilgung) $('sondertilgung').value = d.sondertilgung;
+        if(d.einnahmen) S.einnahmen = d.einnahmen;
+        if(d.ausgaben) S.ausgaben = d.ausgaben;
+        if(d.extras) S.extras = d.extras;
+        // Update toggle
+        var btns = $('ek_tgl').querySelectorAll('button');
+        btns.forEach(function(b){b.classList.toggle('act',b.getAttribute('data-m')===S.ekMode);});
+        // Update slider labels
+        updateAllSliderLabels();
+        return true;
+    }catch(e){return false;}
+}
+
+function updateAllSliderLabels(){
+    $('gest_v').textContent = parseFloat($('grunderwerbsteuer').value).toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
+    $('notar_v').textContent = parseFloat($('notarkosten').value).toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
+    $('makler_v').textContent = parseFloat($('maklerprovision').value).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';
+    $('zins_v').textContent = parseFloat($('zinssatz').value).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';
+    $('tilg_v').textContent = parseFloat($('tilgung').value).toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
+    $('zb_v').textContent = $('zinsbindung').value + ' J.';
+}
+
+// ==========================================
+// EINNAHMEN / AUSGABEN / EXTRAS RENDERING
+// ==========================================
+function renderEin(){
+    var b=$('ein_body');b.innerHTML='';
+    S.einnahmen.forEach(function(it,i){
+        var tr=document.createElement('tr');tr.className='re';
+        tr.innerHTML='<td><input class="en" type="text" value="'+esc(it.n)+'" data-i="'+i+'" data-t="en"></td>'+
+            '<td><input class="ei" type="text" inputmode="decimal" value="'+(it.b>0?fm2(it.b):'0')+'" data-i="'+i+'" data-t="eb"></td>'+
+            '<td><button class="ea-rm" data-i="'+i+'" data-t="re">&times;</button></td>';
+        b.appendChild(tr);
+    });
+    bindEA();updateEA();
+}
+
+function renderAus(){
+    var b=$('aus_body');b.innerHTML='';
+    S.ausgaben.forEach(function(it,i){
+        var tr=document.createElement('tr');tr.className='ra';
+        tr.innerHTML='<td><input class="en" type="text" value="'+esc(it.n)+'" data-i="'+i+'" data-t="an"></td>'+
+            '<td><input class="ei" type="text" inputmode="decimal" value="'+(it.b>0?fm2(it.b):'0')+'" data-i="'+i+'" data-t="ab"></td>'+
+            '<td><button class="ea-rm" data-i="'+i+'" data-t="ra">&times;</button></td>';
+        b.appendChild(tr);
+    });
+    bindEA();updateEA();
+}
+
+function renderExtra(){
+    var b=$('extra_body');b.innerHTML='';
+    S.extras.forEach(function(it,i){
+        var tr=document.createElement('tr');tr.className='rx';
+        tr.innerHTML='<td><input class="en" type="text" value="'+esc(it.n)+'" data-i="'+i+'" data-t="xn"></td>'+
+            '<td><input class="ei" type="text" inputmode="decimal" value="'+(it.b>0?fm2(it.b):'0')+'" data-i="'+i+'" data-t="xb"></td>'+
+            '<td><input class="en" type="text" value="'+esc(it.z||'')+'" data-i="'+i+'" data-t="xz" style="font-size:14px;"></td>'+
+            '<td><button class="ea-rm" data-i="'+i+'" data-t="rx">&times;</button></td>';
+        b.appendChild(tr);
+    });
+    bindEA();updateExtra();
+}
+
+function bindEA(){
+    document.querySelectorAll('.ei').forEach(function(inp){
+        inp.onblur=function(){var v=pn(this.value);this.value=v>0?fm2(v):'0';};
+        inp.oninput=function(){
+            var i=parseInt(this.getAttribute('data-i'));var t=this.getAttribute('data-t');var v=pn(this.value);
+            if(t==='eb'){S.einnahmen[i].b=v;updateEA();}
+            else if(t==='ab'){S.ausgaben[i].b=v;updateEA();}
+            else if(t==='xb'){S.extras[i].b=v;updateExtra();}
+            autoSave();
+        };
+    });
+    document.querySelectorAll('.en').forEach(function(inp){
+        inp.oninput=function(){
+            var i=parseInt(this.getAttribute('data-i'));var t=this.getAttribute('data-t');
+            if(t==='en')S.einnahmen[i].n=this.value;
+            else if(t==='an')S.ausgaben[i].n=this.value;
+            else if(t==='xn')S.extras[i].n=this.value;
+            else if(t==='xz')S.extras[i].z=this.value;
+            autoSave();
+        };
+    });
+    document.querySelectorAll('.ea-rm').forEach(function(btn){
+        btn.onclick=function(){
+            var i=parseInt(this.getAttribute('data-i'));var t=this.getAttribute('data-t');
+            if(t==='re'){S.einnahmen.splice(i,1);renderEin();}
+            else if(t==='ra'){S.ausgaben.splice(i,1);renderAus();}
+            else if(t==='rx'){S.extras.splice(i,1);renderExtra();}
+            autoSave();
+        };
+    });
+}
+
+function updateEA(){
+    var se=0,sa=0;
+    S.einnahmen.forEach(function(e){se+=e.b;});
+    S.ausgaben.forEach(function(a){sa+=a.b;});
+    $('sum_ein').textContent=fm2(se)+' \u20AC';
+    $('sum_aus').textContent=fm2(sa)+' \u20AC';
+    var frei=se-sa;
+    $('r_eink').textContent=fm2(se)+' \u20AC';
+    $('r_fix').textContent=fm2(sa)+' \u20AC';
+    $('r_frei').textContent=fm2(frei)+' \u20AC';
+
+    if(se>0){
+        var q=(mRate/se)*100;var el=$('r_bq');
+        el.textContent=fm2(q)+'%';
+        el.style.color=q<=35?'var(--success)':q<=45?'var(--warning)':'var(--danger)';
+        var puf=frei-mRate;var pe=$('r_puf');
+        pe.textContent=fm2(puf)+' \u20AC';
+        if(puf>=500){pe.style.color='var(--success)';$('r_puf_h').textContent='Guter Puffer';}
+        else if(puf>=200){pe.style.color='var(--warning)';$('r_puf_h').textContent='Knapper Puffer';}
+        else if(puf>=0){pe.style.color='var(--danger)';$('r_puf_h').textContent='Sehr knapp!';}
+        else{pe.style.color='var(--danger)';$('r_puf_h').textContent='ACHTUNG: Einnahmen reichen nicht!';}
+    }else{
+        $('r_bq').textContent='-';$('r_bq').style.color='';
+        $('r_puf').textContent='-';$('r_puf').style.color='';
+        $('r_puf_h').textContent='Bitte Einnahmen eintragen';
+    }
+}
+
+function updateExtra(){
+    var s=0;S.extras.forEach(function(x){s+=x.b;});
+    $('sum_extra').textContent=fm2(s)+' \u20AC';
+    $('r_extra').textContent=fm(s)+' \u20AC';
+    // Update total
+    var kp=pn($('kaufpreis').value);
+    var gp=parseFloat($('grunderwerbsteuer').value);
+    var np=parseFloat($('notarkosten').value);
+    var mp=parseFloat($('maklerprovision').value);
+    var nk=kp*(gp+np+mp)/100;
+    $('r_total').textContent=fm(kp+nk+s)+' \u20AC';
+}
+
+// ==========================================
+// MAIN CALC
+// ==========================================
+function calc(){
+    var kp=pn($('kaufpreis').value);
+    var gp=parseFloat($('grunderwerbsteuer').value);
+    var np=parseFloat($('notarkosten').value);
+    var mp=parseFloat($('maklerprovision').value);
+    var ek=pn($('eigenkapital').value);
+    var zs=parseFloat($('zinssatz').value);
+    var tp=parseFloat($('tilgung').value);
+    var zb=parseInt($('zinsbindung').value);
+    var st=pn($('sondertilgung').value);
+
+    var ge=kp*gp/100,no=kp*np/100,ma=kp*mp/100;
+    var nk=ge+no+ma,gk=kp+nk;
+    var nkp=kp>0?(nk/kp*100):0;
+
+    $('r_gest').textContent=fm(ge)+' \u20AC';
+    $('r_notar').textContent=fm(no)+' \u20AC';
+    $('r_makler').textContent=fm(ma)+' \u20AC';
+    $('r_nk').textContent=fm(nk)+' \u20AC';
+    $('r_nk_pct').textContent=fm2(nkp)+'% vom Kaufpreis';
+    $('r_gesamt').textContent=fm(gk)+' \u20AC';
+
+    var dar;
+    if(S.ekMode==='kaufpreis'){dar=Math.max(0,kp-ek)+nk;}
+    else{dar=Math.max(0,gk-ek);}
+
+    var mz=zs/100/12;
+    var mr=dar*(zs/100+tp/100)/12;
+    mRate=mr;
+
+    $('r_dar').textContent=fm(dar)+' \u20AC';
+    $('r_rate').textContent=fm2(mr)+' \u20AC';
+
+    var bel=kp>0?(dar/kp*100):0;
+    var ekq=gk>0?(ek/gk*100):0;
+    $('r_bel').textContent=fm2(bel)+'%';
+    $('r_ekq').textContent=fm2(Math.min(ekq,100))+'%';
+
+    var ep=gk>0?Math.min(ek/gk*100,100):0;var krp=100-ep;
+    $('ekb_ek').style.width=ep+'%';$('ekb_ek').textContent=ep>10?fm2(ep)+'%':'';
+    $('ekb_kr').style.width=krp+'%';$('ekb_kr').textContent=krp>10?fm2(krp)+'%':'';
+    $('ekb_l1').textContent='EK: '+fm2(ep)+'%';
+    $('ekb_l2').textContent='Kredit: '+fm2(krp)+'%';
+
+    // Tilgungsplan
+    tpData=[];var rs=dar,zG=0,zB=0,rsB=0,mo=0;
+    while(rs>0.01&&mo<600){
+        mo++;var zm=rs*mz;var tm=mr-zm;var sm=0;
+        if(mo%12===0&&st>0){sm=Math.min(st,rs-tm);if(sm<0)sm=0;}
+        if(tm+sm>rs){tm=rs;sm=0;}
+        rs-=(tm+sm);if(rs<0)rs=0;zG+=zm;
+        if(mo<=zb*12)zB+=zm;
+        if(mo===zb*12)rsB=rs;
+        tpData.push({mo:mo,j:Math.ceil(mo/12),z:zm,t:tm,s:sm,r:mr,rs:rs});
+    }
+    if(mo<zb*12){rsB=0;zB=zG;}
+
+    var lj=Math.ceil(mo/12),lm=mo%12;
+    $('r_zges').textContent=fm(zG)+' \u20AC';
+    $('r_zbind').textContent=fm(zB)+' \u20AC';
+    $('r_rest').textContent=fm(rsB)+' \u20AC';
+    $('r_lz').textContent=lm>0?lj+' J. '+lm+' M.':lj+' Jahre';
+
+    renderAmpel(bel,ekq,zG,dar,lj);
+    renderBew(bel,ekq,lj,tp);
+    renderSz(rsB,zs,tp);
+    renderTP();
+    updateEA();
+    updateExtra();
+    if($('t_ch').classList.contains('act'))drawChart();
+    autoSave();
+}
+
+// ==========================================
+// AMPEL
+// ==========================================
+function renderAmpel(bel,ekq,zG,dar,lz){
+    var items=[];
+    function cl(v,rules){for(var i=0;i<rules.length;i++)if(rules[i].c(v))return rules[i];return rules[rules.length-1];}
+    var R={g:'var(--success)',gb:'var(--success-bg)',y:'#d69e2e',yb:'#fefcbf',o:'var(--warning)',ob:'var(--warning-bg)',r:'var(--danger)',rb:'var(--danger-bg)'};
+
+    var b=cl(bel,[{c:function(v){return v<=60;},co:R.g,bg:R.gb,t:'Sehr gut'},{c:function(v){return v<=80;},co:R.y,bg:R.yb,t:'Gut'},{c:function(v){return v<=100;},co:R.o,bg:R.ob,t:'Erhoehtes Risiko'},{c:function(){return true;},co:R.r,bg:R.rb,t:'Hohes Risiko'}]);
+    items.push({l:'Beleihung',v:fm2(bel)+'%',co:b.co,bg:b.bg,t:b.t});
+
+    var e=cl(ekq,[{c:function(v){return v>=30;},co:R.g,bg:R.gb,t:'Sehr gut'},{c:function(v){return v>=20;},co:R.y,bg:R.yb,t:'Gut'},{c:function(v){return v>=10;},co:R.o,bg:R.ob,t:'Knapp'},{c:function(){return true;},co:R.r,bg:R.rb,t:'Zu wenig'}]);
+    items.push({l:'EK-Quote',v:fm2(ekq)+'%',co:e.co,bg:e.bg,t:e.t});
+
+    var zq=dar>0?(zG/dar*100):0;
+    var z=cl(zq,[{c:function(v){return v<=30;},co:R.g,bg:R.gb,t:'Niedrig'},{c:function(v){return v<=60;},co:R.y,bg:R.yb,t:'Mittel'},{c:function(v){return v<=100;},co:R.o,bg:R.ob,t:'Hoch'},{c:function(){return true;},co:R.r,bg:R.rb,t:'Sehr hoch'}]);
+    items.push({l:'Zinslast',v:fm2(zq)+'%',co:z.co,bg:z.bg,t:z.t});
+
+    var l=cl(lz,[{c:function(v){return v<=20;},co:R.g,bg:R.gb,t:'Sehr gut'},{c:function(v){return v<=30;},co:R.y,bg:R.yb,t:'Normal'},{c:function(v){return v<=40;},co:R.o,bg:R.ob,t:'Lang'},{c:function(){return true;},co:R.r,bg:R.rb,t:'Zu lang'}]);
+    items.push({l:'Laufzeit',v:lz+' J.',co:l.co,bg:l.bg,t:l.t});
+
+    var h='';items.forEach(function(it){
+        h+='<div class="amp-i" style="background:'+it.bg+';border:1px solid '+it.co+'22;"><div class="amp-dot" style="background:'+it.co+';"></div><div class="amp-lab" style="color:'+it.co+';">'+it.t+'</div><div class="amp-val">'+it.v+'</div><div class="amp-sub">'+it.l+'</div></div>';
+    });$('ampel_c').innerHTML=h;
+}
+
+// ==========================================
+// BEWERTUNG
+// ==========================================
+function renderBew(bel,ekq,lz,tp){
+    var s=0;
+    if(bel<=60)s+=30;else if(bel<=80)s+=22;else if(bel<=100)s+=12;else s+=4;
+    if(ekq>=30)s+=30;else if(ekq>=20)s+=22;else if(ekq>=10)s+=12;else s+=4;
+    if(lz<=20)s+=20;else if(lz<=25)s+=15;else if(lz<=30)s+=10;else if(lz<=40)s+=5;else s+=2;
+    if(tp>=3)s+=20;else if(tp>=2)s+=15;else if(tp>=1.5)s+=10;else s+=4;
+
+    var co,bg,tx;
+    if(s>=80){co='var(--success)';bg='var(--success-bg)';tx='Ausgezeichnete Finanzierungsstruktur.';}
+    else if(s>=60){co='#d69e2e';bg='#fefcbf';tx='Solide Finanzierung. Mehr EK oder hoehere Tilgung pruefen.';}
+    else if(s>=40){co='var(--warning)';bg='var(--warning-bg)';tx='Erhoehtes Risiko. Mehr EK empfohlen.';}
+    else{co='var(--danger)';bg='var(--danger-bg)';tx='Kritisch. Kaufpreis senken oder mehr EK.';}
+
+    $('bew_box').innerHTML='<div style="font-size:0.78rem;font-weight:600;color:var(--g600);margin-bottom:6px;text-transform:uppercase;">Bewertung: '+Math.round(s)+' / 100</div><div class="bbar"><div class="bfill" style="width:'+s+'%;background:'+co+';"></div></div><div class="btxt" style="background:'+bg+';color:'+co+';border:1px solid '+co+'22;">'+tx+'</div>';
+}
+
+// ==========================================
+// SZENARIEN
+// ==========================================
+function renderSz(rs,az,tp){
+    var sz=[{n:'Zins -1%',z:Math.max(0.5,az-1)},{n:'Gleich',z:az},{n:'+1%',z:az+1},{n:'+2%',z:az+2},{n:'+3%',z:az+3},{n:'Worst +5%',z:az+5}];
+    var ar=rs*(az/100+tp/100)/12;var h='';
+    sz.forEach(function(s,i){
+        var nr=rs*(s.z/100+tp/100)/12;var d=nr-ar;
+        h+='<div class="szc'+(i===0?' best':'')+'"><div class="szt">'+s.n+'</div><div style="font-size:0.75rem;color:var(--g500);margin-bottom:4px;">'+fm2(s.z)+'%</div><div class="szv">'+fm2(nr)+' \u20AC</div><div style="font-size:0.72rem;color:var(--g500);">Monatsrate</div><div style="margin-top:4px;font-size:0.78rem;font-weight:600;color:'+(d>0?'var(--danger)':d<0?'var(--success)':'var(--g500)')+';">'+(d>0?'+':'')+fm2(d)+' \u20AC</div></div>';
+    });$('sz_grid').innerHTML=h;
+}
+
+// ==========================================
+// TILGUNGSPLAN
+// ==========================================
+function renderTP(){
+    if(!tpData.length){$('tp_table').innerHTML='<p style="padding:16px;color:var(--g400);">Keine Daten</p>';return;}
+    var h='<table><thead><tr>';
+    if(S.tpView==='j'){
+        h+='<th>J.</th><th>Zinsen</th><th>Tilgung</th><th>Sondert.</th><th>Gesamt</th><th>Restschuld</th></tr></thead><tbody>';
+        var jr={};tpData.forEach(function(d){if(!jr[d.j])jr[d.j]={z:0,t:0,s:0,g:0,rs:0};jr[d.j].z+=d.z;jr[d.j].t+=d.t;jr[d.j].s+=d.s;jr[d.j].g+=d.z+d.t+d.s;jr[d.j].rs=d.rs;});
+        var zb=parseInt($('zinsbindung').value);
+        Object.keys(jr).forEach(function(j){var d=jr[j];var iz=parseInt(j)===zb;
+            h+='<tr'+(iz?' class="zbh"':'')+'><td>'+j+(iz?' *':'')+'</td><td>'+fm2(d.z)+' \u20AC</td><td>'+fm2(d.t)+' \u20AC</td><td>'+(d.s>0?fm2(d.s)+' \u20AC':'-')+'</td><td>'+fm2(d.g)+' \u20AC</td><td>'+fm2(d.rs)+' \u20AC</td></tr>';
+        });
+    }else{
+        h+='<th>M.</th><th>Zinsen</th><th>Tilg.</th><th>Sond.</th><th>Rate</th><th>Rest</th></tr></thead><tbody>';
+        tpData.forEach(function(d){h+='<tr><td>'+d.mo+'</td><td>'+fm2(d.z)+'</td><td>'+fm2(d.t)+'</td><td>'+(d.s>0?fm2(d.s):'-')+'</td><td>'+fm2(d.z+d.t+d.s)+'</td><td>'+fm2(d.rs)+'</td></tr>';});
+    }
+    h+='</tbody></table>';$('tp_table').innerHTML=h;
+}
+
+// ==========================================
+// CHART
+// ==========================================
+function drawChart(){
+    var c=$('chart'),ctx=c.getContext('2d');
+    var rect=c.parentElement.getBoundingClientRect();
+    var dpr=window.devicePixelRatio||1;
+    c.width=rect.width*dpr;c.height=rect.height*dpr;
+    ctx.scale(dpr,dpr);var W=rect.width,H=rect.height;
+    ctx.clearRect(0,0,W,H);
+    if(!tpData.length)return;
+
+    var jr={};tpData.forEach(function(d){if(!jr[d.j])jr[d.j]={z:0,t:0,rs:0};jr[d.j].z+=d.z;jr[d.j].t+=d.t;jr[d.j].rs=d.rs;});
+    var keys=Object.keys(jr).map(Number);
+    var ss=tpData[0].rs+tpData[0].t+tpData[0].s;
+    var my=ss*1.05||1;
+    var pL=55,pR=10,pT=28,pB=38;
+    var pW=W-pL-pR,pH=H-pT-pB;
+    var n=keys.length;if(!n)return;
+
+    ctx.strokeStyle='#e2e8f0';ctx.lineWidth=0.5;
+    for(var i=0;i<=4;i++){var y=pT+(pH/4)*i;ctx.beginPath();ctx.moveTo(pL,y);ctx.lineTo(W-pR,y);ctx.stroke();ctx.fillStyle='#a0aec0';ctx.font='9px -apple-system,sans-serif';ctx.textAlign='right';ctx.fillText(fm(my-(my/4)*i),pL-4,y+3);}
+
+    var bW=Math.min(pW/n*0.55,18);var gap=pW/n;var pts=[];
+    keys.forEach(function(j,idx){
+        var x=pL+gap*idx+gap/2;var d=jr[j];
+        var zH=(d.z/my)*pH;var tH=(d.t/my)*pH;var rY=pT+(1-d.rs/my)*pH;
+        ctx.fillStyle='#4299e1';ctx.fillRect(x-bW/2,pT+pH-tH-zH,bW/2,tH);
+        ctx.fillStyle='#fc8181';ctx.fillRect(x,pT+pH-zH,bW/2,zH);
+        pts.push({x:x,y:rY});
+        if(n<=25||idx%Math.ceil(n/15)===0){ctx.fillStyle='#a0aec0';ctx.font='8px -apple-system,sans-serif';ctx.textAlign='center';ctx.fillText(j,x,H-pB+12);}
+    });
+
+    ctx.beginPath();ctx.strokeStyle='#2c5282';ctx.lineWidth=2;
+    pts.forEach(function(p,i){if(i===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y);});ctx.stroke();
+    pts.forEach(function(p){ctx.beginPath();ctx.arc(p.x,p.y,2,0,Math.PI*2);ctx.fillStyle='#2c5282';ctx.fill();});
+
+    var ly=8;ctx.font='9px -apple-system,sans-serif';
+    ctx.fillStyle='#4299e1';ctx.fillRect(pL,ly,8,7);ctx.fillStyle='#4a5568';ctx.textAlign='left';ctx.fillText('Tilgung',pL+12,ly+7);
+    ctx.fillStyle='#fc8181';ctx.fillRect(pL+55,ly,8,7);ctx.fillStyle='#4a5568';ctx.fillText('Zinsen',pL+67,ly+7);
+    ctx.fillStyle='#2c5282';ctx.fillRect(pL+105,ly,8,2);ctx.fillRect(pL+105,ly+3,8,2);ctx.fillStyle='#4a5568';ctx.fillText('Restschuld',pL+117,ly+7);
+}
+
+// ==========================================
+// CSV
+// ==========================================
+function exportCSV(){
+    if(!tpData.length)return;
+    var csv='Monat;Jahr;Zinsen;Tilgung;Sondertilgung;Rate;Restschuld\n';
+    tpData.forEach(function(d){csv+=d.mo+';'+d.j+';'+fm2(d.z)+';'+fm2(d.t)+';'+fm2(d.s)+';'+fm2(d.z+d.t+d.s)+';'+fm2(d.rs)+'\n';});
+    var blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+    var lnk=document.createElement('a');lnk.href=URL.createObjectURL(blob);
+    lnk.download='Tilgungsplan_'+new Date().toISOString().slice(0,10)+'.csv';lnk.click();
+    notify('CSV exportiert!');
+}
+
+// ==========================================
+// RESET
+// ==========================================
+function resetAll(){
+    if(!confirm('Alle Eingaben zuruecksetzen?'))return;
+    localStorage.removeItem(SAVE_KEY);
+    $('kaufpreis').value='350.000';$('bundesland').value='6.0';
+    $('grunderwerbsteuer').value=6.0;$('notarkosten').value=2.0;
+    $('maklerprovision').value=3.57;$('eigenkapital').value='80.000';
+    $('zinssatz').value=3.5;$('tilgung').value=2.0;
+    $('zinsbindung').value=15;$('sondertilgung').value='0';
+    S.ekMode='gesamt';
+    S.einnahmen=[{n:'Nettolohn Person 1',b:0},{n:'Nettolohn Person 2',b:0},{n:'Kindergeld',b:0}];
+    S.ausgaben=[{n:'Lebensmittel & Haushalt',b:0},{n:'Versicherungen',b:0},{n:'Strom & Gas',b:0},{n:'Internet & Telefon',b:0},{n:'Auto',b:0},{n:'Abos & Streaming',b:0},{n:'Sonstige Kredite',b:0},{n:'Kinderbetreuung',b:0},{n:'Sonstiges',b:0}];
+    S.extras=[{n:'Renovierung',b:0,z:'Vor Einzug'},{n:'Neue Kueche',b:0,z:'Vor Einzug'},{n:'Heizung/Daemmung',b:0,z:'In 5 J.'},{n:'Dachsanierung',b:0,z:'In 10 J.'},{n:'Baeder',b:0,z:'Vor Einzug'},{n:'Garten/Aussen',b:0,z:'In 2 J.'}];
+    var btns=$('ek_tgl').querySelectorAll('button');
+    btns[0].classList.add('act');btns[1].classList.remove('act');
+    updateAllSliderLabels();renderEin();renderAus();renderExtra();calc();
+    notify('Zurueckgesetzt!');
+}
+
+// ==========================================
+// INIT
+// ==========================================
+function init(){
+    // Load saved data
+    var loaded = loadState();
+
+    // Slider bindings
+    var sliders=[
+        {id:'grunderwerbsteuer',lbl:'gest_v',suf:'%',d:1},
+        {id:'notarkosten',lbl:'notar_v',suf:'%',d:1},
+        {id:'maklerprovision',lbl:'makler_v',suf:'%',d:2},
+        {id:'zinssatz',lbl:'zins_v',suf:'%',d:2},
+        {id:'tilgung',lbl:'tilg_v',suf:'%',d:1},
+        {id:'zinsbindung',lbl:'zb_v',suf:' J.',d:0}
+    ];
+
+    sliders.forEach(function(cfg){
+        var sl=$(cfg.id);if(!sl)return;
+        function h(){
+            var v=parseFloat(sl.value);
+            $(cfg.lbl).textContent=v.toLocaleString('de-DE',{minimumFractionDigits:cfg.d,maximumFractionDigits:cfg.d})+cfg.suf;
+            calc();
+        }
+        sl.addEventListener('input',h);
+        sl.addEventListener('change',h);
+        sl.addEventListener('touchend',h);
+    });
+
+    // Text inputs
+    ['kaufpreis','eigenkapital','sondertilgung'].forEach(function(id){
+        var inp=$(id);if(!inp)return;
+        function h(){fmtInput(inp);calc();}
+        inp.addEventListener('input',h);
+        inp.addEventListener('change',h);
+    });
+
+    // Bundesland
+    $('bundesland').addEventListener('change',function(){
+        var v=parseFloat(this.value);
+        $('grunderwerbsteuer').value=v;
+        $('gest_v').textContent=v.toLocaleString('de-DE',{minimumFractionDigits:1})+'%';
+        calc();
+    });
+
+    // EK toggle
+    $('ek_tgl').addEventListener('click',function(e){
+        var b=e.target.closest('button');if(!b)return;
+        S.ekMode=b.getAttribute('data-m');
+        this.querySelectorAll('button').forEach(function(x){x.classList.remove('act');});
+        b.classList.add('act');calc();
+    });
+
+    // Tabs
+    $('mtabs').addEventListener('click',function(e){
+        var b=e.target.closest('button');if(!b)return;
+        var tid=b.getAttribute('data-t');
+        this.querySelectorAll('button').forEach(function(x){x.classList.remove('act');});
+        b.classList.add('act');
+        b.closest('.card-b').querySelectorAll('.tc').forEach(function(c){c.classList.remove('act');});
+        $(tid).classList.add('act');
+        if(tid==='t_ch')drawChart();
+    });
+
+    // TP toggle
+    $('tp_tgl').addEventListener('click',function(e){
+        var b=e.target.closest('button');if(!b)return;
+        S.tpView=b.getAttribute('data-v');
+        this.querySelectorAll('button').forEach(function(x){x.classList.remove('act');});
+        b.classList.add('act');renderTP();
+    });
+
+    // Buttons
+    $('btn_reset').addEventListener('click',resetAll);
+    $('btn_print').addEventListener('click',function(){window.print();});
+    $('btn_csv').addEventListener('click',exportCSV);
+    $('btn_save').addEventListener('click',function(){saveState();notify('Gespeichert!');});
+
+    // Add buttons
+    $('add_ein').addEventListener('click',function(){S.einnahmen.push({n:'Neue Einnahme',b:0});renderEin();autoSave();});
+    $('add_aus').addEventListener('click',function(){S.ausgaben.push({n:'Neue Ausgabe',b:0});renderAus();autoSave();});
+    $('add_extra').addEventListener('click',function(){S.extras.push({n:'Neue Massnahme',b:0,z:''});renderExtra();autoSave();});
+
+    // Resize
+    window.addEventListener('resize',function(){if($('t_ch').classList.contains('act'))drawChart();});
+
+    // Render tables
+    renderEin();renderAus();renderExtra();
+
+    // Initial calc
+    calc();
+
+    if(loaded) notify('Gespeicherte Daten geladen!');
+}
+
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}
+else{init();}
+
+})();
+</script>
+</body>
+</html>
